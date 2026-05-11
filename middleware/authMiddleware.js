@@ -17,6 +17,7 @@ export function jwtMiddleware (req, res, next) {
                 message : "tidak teridentifikasi"
             })
         }
+        req.user = decoded
         // 3. jika berhasil, lanjut
         next()
     })
