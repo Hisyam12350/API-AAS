@@ -9,6 +9,7 @@ import { fileURLToPath } from "url"
 import cors from "cors"
 import kategoriRouter from "./routes/kategoriRoutes.js"
 import komentarRouter from "./routes/komentarRoutes.js"
+import balasKomentarRouter from "./routes/balasKomentarRouter.js"
 
 const app = express()
 const port = 5000
@@ -25,6 +26,7 @@ app.use("/api/komentar", jwtMiddleware, komentarRouter)
 
 app.use("/api/users", jwtMiddleware, userRouter)
 app.use("/api/laporan", jwtMiddleware, laporanRouter)
+app.use("/api/balasKomentar", jwtMiddleware, balasKomentarRouter)
 
 app.use("/gambar", express.static(path.join(__dirname, "image")));
 

@@ -34,5 +34,18 @@ export async function createKomentar(req, res) {
   } catch (error) {
     res.status(500).json({ message: "server error", error: error.message });
   }
-  
+}
+
+export async function deleteKomentar(req, res) {
+  const { id } = req.params;
+
+  const [komentar] = await connection.query(
+    "delete from tb_komentar where id = ?",
+    [id]
+  );
+  res.status(200).json({
+    message: "success",
+    data: komentar,
+    ok: true,
+  });
 }

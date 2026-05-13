@@ -40,6 +40,7 @@ export async function createUser(req, res) {
       data: user,
       ok: true,
     });
+    
   } catch (error) {
     res.status(500).json({
       message: "server error",
