@@ -1,8 +1,8 @@
 import express from "express"
-import { getKategori } from "../controller/kategoriController.js"
+import { createKategori, getKategori } from "../controller/kategoriController.js"
 
 const kategoriRouter = express.Router()
 
 kategoriRouter.get("/", getKategori)
-
+kategoriRouter.post("/", createKategori)
 export default kategoriRouter

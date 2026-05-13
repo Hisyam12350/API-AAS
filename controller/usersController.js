@@ -40,7 +40,6 @@ export async function createUser(req, res) {
       data: user,
       ok: true,
     });
-    
   } catch (error) {
     res.status(500).json({
       message: "server error",
@@ -66,10 +65,33 @@ export async function updateUser(req, res) {
 
 export async function deleteUser(req, res) {
   const { id } = req.params;
-  const [user] = await connection.query("delete from tb_users where id = ?", [id]);
+  const [user] = await connection.query("delete from tb_users where id = ?", [
+    id,
+  ]);
   res.status(200).json({
     message: "success",
     data: user,
     ok: true,
   });
+}
+
+export async function getUserById(req, res) {
+  const { id } = req.params;
+
+  try {
+    const [user] = await connection.query(
+      "select * from tb_users where id = ?",
+      [id],
+    );
+    res.status(200).json({
+      message: "success",
+      data: user,
+      ok: true,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "server error",
+      error: error.message,
+    });
+  }
 }
