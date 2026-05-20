@@ -50,17 +50,52 @@ export async function createUser(req, res) {
 
 export async function updateUser(req, res) {
   const { id } = req.params;
-  const { username, email, password, role } = req.body;
+  const { username, email, password, nomor_telepon, alamat, bio } = req.body;
 
   const [user] = await connection.query(
-    "update tb_users set username = ?, email = ?, password = ?, role = ? where id = ?",
-    [username, email, password, role, id],
+    "update tb_users set username = ?, email = ?, password = ?, nomor_telepon = ?, alamat = ?, bio = ? where id = ?",
+    [username, email, password, nomor_telepon, alamat, bio, id],
   );
   res.status(200).json({
     message: "success",
     data: user,
     ok: true,
   });
+}
+
+export async function tambahGambarUser(req, res) {
+  const { id } = req.params;
+  const gambar = req.file ? req.file.filename : null;
+  console.log("req.file:", req.file); // ← cek apakah file diterima
+  console.log("gambar:", gambar);
+
+  try {
+    const [cek] = await connection.query(
+      "select * from tb_users where id = ?",
+      [id],
+    );
+    if (cek.length === 0) {
+      return res.status(400).json({
+        message: "user tidak ditemukan",
+      });
+    }
+
+    const [user] = await connection.query(
+      "update tb_users set fotoProfile = ? where id = ?",
+      [gambar, id],
+    );
+
+    res.status(200).json({
+      message: "success",
+      data: user,
+      ok: true,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "server error",
+      error: error.message,
+    });
+  }
 }
 
 export async function deleteUser(req, res) {

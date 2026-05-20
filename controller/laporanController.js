@@ -2,7 +2,12 @@ import { channel } from "diagnostics_channel";
 import connection from "../database.js";
 
 export async function getLaporan(req, res) {
-  const [laporan] = await connection.query("select * from tb_laporan");
+  const [laporan] = await connection.query(`
+    select a.id as id_user, a.username, a.role, b.judul, b.id,b.gambar, b.lokasi, b.create_at, b.status, c.nama_kategori
+		from tb_users a
+    join tb_laporan b on b.id_user = a.id
+    join tb_kategori c on c.id = b.kategori_id;
+    `);
 
   res.status(200).json({
     message: "success",
@@ -73,11 +78,35 @@ export async function getLaporanById(req, res) {
   const { id } = req.params;
 
   const [laporan] = await connection.query(
-    `select a.username, a.email, b.judul, b.id, b.status, b.gambar, b.deskripsi, b.lokasi, b.create_at, c.nama_kategori
-        from tb_users a
-        join tb_laporan b on b.id_user = a.id
-        join tb_kategori c on c.id = b.id where b.id = ?;`,
-    [id],
+    `select a.username, a.email, b.judul, b.id, b.status, b.gambar, b.deskripsi, b.lokasi, b.create_at, c.nama_kategori 
+    from tb_users a 
+    join tb_laporan b on b.id_user = a.id 
+    join tb_kategori c on c.id = b.kategori_id where b.id = ?;`,
+    [id]
+  );
+
+  if (laporan.length === 0) {
+    return res.status(404).json({
+      message: "laporan tidak ditemukan",
+    });
+  }
+
+  res.status(200).json({
+    message: "success",
+    data: laporan,
+    ok: true,
+  });
+}
+
+export async function getLaporanByUser(req, res) {
+  const { id } = req.params;
+
+  const [laporan] = await connection.query(
+    `select a.username, a.id as id_user, a.email, b.judul, b.id, b.status, b.gambar, b.deskripsi, b.lokasi, b.create_at, c.nama_kategori 
+    from tb_users a 
+    join tb_laporan b on b.id_user = a.id 
+    join tb_kategori c on c.id = b.kategori_id where a.id = ?;`,
+    [id]
   );
 
   if (laporan.length === 0) {
@@ -164,8 +193,8 @@ export async function updateLaporan(req, res) {
     const [laporan] = await connection.query(
       "update tb_laporan set judul = ?, deskripsi = ?, gambar = ?, lokasi = ?, kategori_id = ?, status = ? where id = ?",
       [judul, deskripsi, gambarBaru, lokasi, kategori_id, status, id],
-    );  
-   
+    );
+
     res.status(200).json({
       message: "success",
       data: laporan,

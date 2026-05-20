@@ -27,7 +27,6 @@ app.use("/api/komentar", jwtMiddleware, komentarRouter)
 app.use("/api/users", jwtMiddleware, userRouter)
 app.use("/api/laporan", jwtMiddleware, laporanRouter)
 app.use("/api/balasKomentar", jwtMiddleware, balasKomentarRouter)
-
 app.use("/gambar", express.static(path.join(__dirname, "image")));
 
 app.listen(port, () => {
