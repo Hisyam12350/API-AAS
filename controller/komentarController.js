@@ -1,14 +1,17 @@
 import connection from "../database.js";
 
 export async function getKomentar(req, res) {
-  try {
-    const [komentar] = await connection.query(`
-            SELECT a.username, b.judul , c.isi_komentar
-                from tb_users a
-                join tb_laporan b on b.id_user = a.id
-                join tb_komentar c on c.id_laporan = b.id;
-        `);
+  const { id_laporan } = req.params;
 
+  try {
+    const [komentar] = await connection.query(
+      `SELECT c.id, c.id_user, a.username, a.fotoProfile, c.isi_komentar, c.create_at
+      FROM tb_users a
+      JOIN tb_komentar c ON c.id_user = a.id
+      WHERE c.id_laporan = ?
+      `,
+      [id_laporan],
+    );
     res.status(200).json({
       message: "success",
       data: komentar,
@@ -20,11 +23,13 @@ export async function getKomentar(req, res) {
 }
 
 export async function createKomentar(req, res) {
-  const {id_user, id_laporan, isi_komentar } = req.body;
+  const id_user = req.user.id;
+  const { id_laporan, isi_komentar } = req.body;
+
   try {
     const [komentar] = await connection.query(
       "insert into tb_komentar (id_user, id_laporan, isi_komentar) values (?, ?, ?)",
-      [id_user, id_laporan, isi_komentar]
+      [id_user, id_laporan, isi_komentar],
     );
     res.status(201).json({
       message: "success",
@@ -41,7 +46,7 @@ export async function deleteKomentar(req, res) {
 
   const [komentar] = await connection.query(
     "delete from tb_komentar where id = ?",
-    [id]
+    [id],
   );
   res.status(200).json({
     message: "success",

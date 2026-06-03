@@ -20,13 +20,13 @@ export async function createLaporan(req, res) {
   console.log("req.user:", req.user);
   const id_user = req.user.id;
 
-  const { judul, deskripsi, lokasi, kategori_id } = req.body;
+  const { judul, deskripsi, lokasi, kategori_id, status } = req.body;
   const image = req.file ? req.file.filename : null;
 
-  if (!judul || !image || !deskripsi || !lokasi || !kategori_id) {
+  if (!judul || !image || !deskripsi || !lokasi || !kategori_id || !status) {
     console.log("Validasi Gagal");
     return res.status(400).json({
-      message: "judul, gambar, deskripsi, lokasi, kategori_id wajib di isi",
+      message: "judul, gambar, deskripsi, lokasi, kategori_id, dan status wajib di isi",
     });
   }
   console.log("Validasi Berhasil");
@@ -51,8 +51,8 @@ export async function createLaporan(req, res) {
     }
 
     const [laporan] = await connection.query(
-      "insert into tb_laporan (id_user, judul, gambar, deskripsi, lokasi, kategori_id) values (?, ?, ?, ?, ?, ?)",
-      [id_user, judul, image, deskripsi, lokasi, kategori_id],
+      "insert into tb_laporan (id_user, judul, gambar, deskripsi, lokasi, kategori_id, status) values (?, ?, ?, ?, ?, ?, ?)",
+      [id_user, judul, image, deskripsi, lokasi, kategori_id, status],
     );
     res.status(201).json({
       message: "success",
@@ -63,6 +63,7 @@ export async function createLaporan(req, res) {
         deskripsi,
         lokasi,
         kategori: kategori[0].nama,
+        status,
       },
       ok: true,
     });
@@ -82,7 +83,7 @@ export async function getLaporanById(req, res) {
     from tb_users a 
     join tb_laporan b on b.id_user = a.id 
     join tb_kategori c on c.id = b.kategori_id where b.id = ?;`,
-    [id]
+    [id],
   );
 
   if (laporan.length === 0) {
@@ -106,7 +107,7 @@ export async function getLaporanByUser(req, res) {
     from tb_users a 
     join tb_laporan b on b.id_user = a.id 
     join tb_kategori c on c.id = b.kategori_id where a.id = ?;`,
-    [id]
+    [id],
   );
 
   if (laporan.length === 0) {
@@ -206,4 +207,79 @@ export async function updateLaporan(req, res) {
       error: error.message,
     });
   }
+}
+
+export async function getTotalLaporan(req, res) {
+  try {
+    const [result] = await connection.query(
+      `select count(*) as total_laporan,
+        sum(status = "Selesai") as laporan_selesai,
+        sum(status = "Diproses") as laporan_peroses,
+        sum(status = "Menunggu") as laporan_menunggu,
+        sum(status = "Ditolak") as laporan_ditolak
+    from tb_laporan;`,
+    );
+
+    res.status(200).json({
+      message: "success",
+      total: result[0].total_laporan,
+      selesai: result[0].laporan_selesai,
+      proses: result[0].laporan_peroses,
+      menunggu: result[0].laporan_menunggu,
+      ditolak: result[0].laporan_ditolak,
+      ok: true,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "server error", error: error.message });
+  }
+}
+
+export async function getTotalLaporanByUser(req, res) {
+  const { id } = req.params;
+
+  try {
+    const [result] = await connection.query(
+      `select count(*) as total_laporan,
+        sum(status = "Selesai") as laporan_selesai,
+        sum(status = "Diproses") as laporan_peroses,
+        sum(status = "Menunggu") as laporan_menunggu,
+        sum(status = "Ditolak") as laporan_ditolak
+        from tb_laporan where id_user = ?;`,
+      [id],
+    );
+
+    res.status(200).json({
+      message: "success",
+      total: result[0].total_laporan,
+      selesai: result[0].laporan_selesai,
+      proses: result[0].laporan_peroses,
+      menunggu: result[0].laporan_menunggu,
+      ditolak: result[0].laporan_ditolak,
+      ok: true,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "server error", error: error.message });
+  }
+}
+
+export async function getLaporanPerBulan(req, res) {
+    try {
+        const [result] = await connection.query(`
+            SELECT 
+                MONTH(create_at) as bulan,
+                YEAR(create_at) as tahun,
+                COUNT(*) as total
+            FROM tb_laporan
+            GROUP BY YEAR(create_at), MONTH(create_at)
+            ORDER BY tahun ASC, bulan ASC
+        `)
+
+        res.status(200).json({
+            message: "success",
+            data: result,
+            ok: true,
+        })
+    } catch (error) {
+        res.status(500).json({ message: "server error", error: error.message })
+    }
 }

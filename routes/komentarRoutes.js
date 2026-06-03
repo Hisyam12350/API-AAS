@@ -3,7 +3,7 @@ import { createKomentar, deleteKomentar, getKomentar } from "../controller/komen
 
 const komentarRouter = express.Router()
 
-komentarRouter.get("/", getKomentar)
+komentarRouter.get("/:id_laporan", getKomentar)
 komentarRouter.post("/", createKomentar)
 komentarRouter.delete("/:id", deleteKomentar)
 

@@ -1,8 +1,12 @@
 import express from "express"
-import { createKategori, getKategori } from "../controller/kategoriController.js"
-
+import { createKategori, createRequest, deleteKategori, getAllRequest, getKategori, updateRequest } from "../controller/kategoriController.js"
+import { adminOnly, superAdminOnly } from "../middleware/authRole.js"
 const kategoriRouter = express.Router()
 
 kategoriRouter.get("/", getKategori)
-kategoriRouter.post("/", createKategori)
+kategoriRouter.get("/get-request", superAdminOnly, getAllRequest)
+kategoriRouter.post("/create-category", superAdminOnly, createKategori)
+kategoriRouter.post("/", adminOnly, createRequest)
+kategoriRouter.delete("/:id", superAdminOnly, deleteKategori)
+kategoriRouter.put("/:id", superAdminOnly, updateRequest)
 export default kategoriRouter

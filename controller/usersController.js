@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 export async function getUsers(req, res) {
   // 1. ngequery data users
   const [users] = await connection.query(
-    "select id, username, email, password, role from tb_users",
+    "select * from tb_users",
   );
 
   // 2. ngersponse ke client
