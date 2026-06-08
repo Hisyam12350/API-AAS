@@ -3,9 +3,7 @@ import bcrypt from "bcrypt";
 
 export async function getUsers(req, res) {
   // 1. ngequery data users
-  const [users] = await connection.query(
-    "select * from tb_users",
-  );
+  const [users] = await connection.query("select * from tb_users");
 
   // 2. ngersponse ke client
   res.status(200).json({
@@ -51,6 +49,9 @@ export async function createUser(req, res) {
 export async function updateUser(req, res) {
   const { id } = req.params;
   const { username, email, password, nomor_telepon, alamat, bio } = req.body;
+  const nomor_telepon = req.body.nomor_telepon
+    ? parseInt(req.body.nomor_telepon)
+    : null;
 
   const [user] = await connection.query(
     "update tb_users set username = ?, email = ?, password = ?, nomor_telepon = ?, alamat = ?, bio = ? where id = ?",
